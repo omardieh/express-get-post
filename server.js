@@ -5,6 +5,8 @@ const port = 3000;
 const app = express();
 app.set("view engine", "hbs");
 app.set("views", __dirname + "/views");
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // app.get("/", (req, res) => {
 //   res.render("index");
@@ -140,6 +142,53 @@ app.get("/search", (req, res) => {
 // https://www.airbnb.com/rooms/40460144?adults=1&category_tag=Tag%3A789&children=0&enable_m3_private_room=true&infants=0&pets=0&photo_id=1007468457&search_mode=flex_destinations_search&check_in=2023-10-23&check_out=2023-10-30&source_impression_id=p3_1693824588_9lzrCujHZpEsjO9e&previous_page_section_name=1000&federated_search_id=1e902bc5-27e3-4ff2-97be-02707e34dce8
 // req.param
 // req.query
+
+// app.get("/user-data", (req, res) => {
+//   console.log(req.query);
+// });
+
+// app.post("/user-data", (req, res) => {
+//   console.log(req.body);
+// });
+
+app.get("/get-user-info", (req, res) => {
+  res.render("user-form");
+});
+
+app.get("/display-user-info", (req, res) => {
+  const { name, age, superhero } = req.query;
+  console.log(name, age, superhero);
+  res.send(req.query);
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  console.log(req.body);
+});
+
+function isAuthenticated(req, res, next) {
+  const { secret } = req.query;
+  if (Number(secret) !== 123) {
+    res.status(401).send("not authenticated");
+    return;
+  }
+  next();
+}
+
+function allowResponseToUser(req, res) {
+  res.status(200).send("welcome to the private page");
+}
+app.get("/private", isAuthenticated, allowResponseToUser);
+
+const handleNonExistingRoute = (req, res) => {
+  res.status(404).send("Page not found");
+};
+
+app.use(handleNonExistingRoute);
+
 app.listen(port, (error) => {
   error ? console.error(error) : console.log("connected to port : ", port);
 });
